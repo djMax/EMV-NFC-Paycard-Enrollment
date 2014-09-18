@@ -36,13 +36,13 @@ public class ApduCommand {
                 if (len % 2 != 0) {
                     throw new IllegalArgumentException("Hex string must be a multiple of 2");
                 }
-                for (int i = 0; i < len; i++) {
-                    getBytes().write((byte) ((Character.digit(s.charAt(i), 16) << 4)
-                            + Character.digit(s.charAt(i + 1), 16)));
+                for (int i = 0; i < len; i+=2) {
+                    bytes.write((byte) ((Character.digit(str.charAt(i), 16) << 4)
+                            + Character.digit(str.charAt(i + 1), 16)));
                 }
                 break;
             case Ascii:
-                getBytes().write(str.getBytes(Charsets.US_ASCII));
+                bytes.write(str.getBytes(Charsets.US_ASCII));
                 break;
             default:
                 throw new IllegalArgumentException("Unknown string input format.");
@@ -65,10 +65,13 @@ public class ApduCommand {
         baos.write(p1);
         baos.write(p2);
         if (bytes.size() > 256) {
-            throw new IllegalArgumentException("Message size is too long.")
+            throw new IllegalArgumentException("Message size is too long.");
         }
         baos.write(bytes.size());
-        baos.write(bytes.toByteArray());
+        if (bytes.size() > 0) {
+            baos.write(bytes.toByteArray());
+        }
+        baos.write((byte)0);
         return baos.toByteArray();
     }
 
