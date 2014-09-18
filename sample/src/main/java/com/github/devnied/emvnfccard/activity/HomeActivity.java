@@ -63,7 +63,6 @@ import fr.devnied.bitlib.BytesUtils;
  * @author MILLAU Julien
  * 
  */
-@SuppressLint("InlinedApi")
 public class HomeActivity extends FragmentActivity implements OnItemClickListener, IContentActivity {
 
 	/**
