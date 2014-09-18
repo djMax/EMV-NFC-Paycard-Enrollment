@@ -9,6 +9,10 @@ import android.nfc.NfcAdapter;
 import android.nfc.Tag;
 import android.nfc.tech.IsoDep;
 import android.nfc.tech.NfcA;
+import android.util.Log;
+
+import org.apache.commons.codec.binary.Hex;
+import org.apache.commons.io.HexDump;
 
 /**
  * 
@@ -102,10 +106,42 @@ public class NFCUtils {
                                 .appendAscii("2PAY.SYS.DDF01")
                                 .getBytes();
 
-                        bytes[] hist = iso.getHistoricalBytes();
+                        byte[] hist = iso.getHistoricalBytes();
+                        Log.i("NFC<<<", new String(Hex.encodeHex(SELECT)));
+
                         byte[] response = iso.transceive(SELECT);
 
-                        System.out.println(response.toString());
+                        //EmvTemplateResponse emvResponse = new EmvTemplateResponse(response);
+                        Log.i("NFC>>>", new String(Hex.encodeHex(response)));
+
+                        byte[] CCAPPLET = new ApduCommand()
+                                .Instruction(0xA4)
+                                .P1(0x04)
+                                .P2(0)
+                                .appendHex("A0000000041010")
+                                .getBytes();
+                        Log.i("NFC<<<", new String(Hex.encodeHex(CCAPPLET)));
+                        response = iso.transceive(CCAPPLET);
+                        Log.i("NFC>>>", new String(Hex.encodeHex(response)));
+
+                        byte[] GET_OPTIONS = new ApduCommand()
+                                .CommandClass(0x80)
+                                .Instruction(0xA8)
+                                .appendHex("8300")
+                                .getBytes();
+                        Log.i("NFC<<<", new String(Hex.encodeHex(GET_OPTIONS)));
+                        response = iso.transceive(GET_OPTIONS);
+                        Log.i("NFC>>>", new String(Hex.encodeHex(response)));
+
+                        byte[] READ_RECORD = new ApduCommand()
+                                .Instruction(0xb2)
+                                .P1(1)
+                                .P2(0xc)
+                                .getBytes();
+                        Log.i("NFC<<<", new String(Hex.encodeHex(READ_RECORD)));
+                        response = iso.transceive(READ_RECORD);
+                        Log.i("NFC>>>", new String(Hex.encodeHex(response)));
+
                     } catch (Exception x) {
                         System.out.println(x.toString());
                     }
