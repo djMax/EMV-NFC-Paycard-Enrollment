@@ -102,7 +102,6 @@ public class NFCUtils {
                         byte[] SELECT = new ApduCommand()
                                 .Instruction(0xA4)
                                 .P1(0x04)
-                                .P2(0)
                                 .appendAscii("2PAY.SYS.DDF01")
                                 .getBytes();
 
@@ -117,7 +116,7 @@ public class NFCUtils {
                         byte[] CCAPPLET = new ApduCommand()
                                 .Instruction(0xA4)
                                 .P1(0x04)
-                                .P2(0)
+//                                .appendHex("A0000000031010")
                                 .appendHex("A0000000041010")
                                 .getBytes();
                         Log.i("NFC<<<", new String(Hex.encodeHex(CCAPPLET)));
@@ -134,6 +133,7 @@ public class NFCUtils {
                         Log.i("NFC>>>", new String(Hex.encodeHex(response)));
 
                         byte[] READ_RECORD = new ApduCommand()
+                                .NoData()
                                 .Instruction(0xb2)
                                 .P1(1)
                                 .P2(0xc)
@@ -141,6 +141,22 @@ public class NFCUtils {
                         Log.i("NFC<<<", new String(Hex.encodeHex(READ_RECORD)));
                         response = iso.transceive(READ_RECORD);
                         Log.i("NFC>>>", new String(Hex.encodeHex(response)));
+
+                        byte[] CRYPTOGRAM = new ApduCommand()
+                                .CommandClass(0x80)
+                                .Instruction(0x2A)
+                                .P1(0x8e)
+                                .P2(0x80)
+                                .appendHex("00000012") // Unpredictable number (2 digits)
+                                .appendHex("00") // no offline pin
+                                .appendHex("000000000100") // 1.00
+                                .appendHex("0840") // USD
+                                .appendHex("0840") // USA! USA! USA!
+                                .getBytes();
+                        Log.i("NFC<<<", new String(Hex.encodeHex(CRYPTOGRAM)));
+                        response = iso.transceive(CRYPTOGRAM);
+                        Log.i("NFC>>>", new String(Hex.encodeHex(response)));
+
 
                     } catch (Exception x) {
                         System.out.println(x.toString());

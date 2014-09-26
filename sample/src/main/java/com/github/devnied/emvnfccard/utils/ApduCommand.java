@@ -14,6 +14,8 @@ public class ApduCommand {
     private byte instruction;
     private byte p1;
     private byte p2;
+    private byte le;
+    private boolean emptyData;
 
     public enum StringInputFormat {
         Hex,
@@ -67,11 +69,13 @@ public class ApduCommand {
         if (bytes.size() > 256) {
             throw new IllegalArgumentException("Message size is too long.");
         }
-        baos.write(bytes.size());
-        if (bytes.size() > 0) {
-            baos.write(bytes.toByteArray());
+        if (!emptyData) {
+            baos.write(bytes.size());
+            if (bytes.size() > 0) {
+                baos.write(bytes.toByteArray());
+            }
         }
-        baos.write((byte)0);
+        baos.write(this.le);
         return baos.toByteArray();
     }
 
@@ -112,4 +116,19 @@ public class ApduCommand {
         return this;
     }
 
+    public byte getLe() { return le; }
+
+    public ApduCommand Le(int le) {
+        this.le = (byte) le;
+        return this;
+    }
+
+    public boolean isEmptyData() {
+        return emptyData;
+    }
+
+    public ApduCommand NoData() {
+        emptyData = true;
+        return this;
+    }
 }
